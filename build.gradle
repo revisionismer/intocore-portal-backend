@@ -1,0 +1,95 @@
+plugins {
+	id 'java'
+	id 'war'
+	id 'org.springframework.boot' version '3.5.10'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.intocore'
+version = '0.0.1-SNAPSHOT'
+description = 'Demo project for Spring Boot'
+
+java {
+	sourceCompatibility = '17'
+	targetCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	/* 1-1. JPA */
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	
+	/* 1-2. Security */
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	
+	/* 1-3. Web */
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	
+	/* 1-4. lombok */
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	
+	/* 1-5. JDBC */
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	
+	/* 1-6. mariadb  */
+	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+	
+	/* 1-7. h2 database */
+	runtimeOnly 'com.h2database:h2'
+
+	/* 1-8. mybatis */
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+	
+	/* 1-9. validation */ 
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	
+	// 1-10. aop : 공통 관심사 처리 (로깅, 실행시간 측정, 권한 공통 처리)
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	
+	/* 1-11. devtools */
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	
+	/* 1-12. jackson : 이미 포함되어 있지만 명시화 */
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	
+	/* 1-13. jwt - api */
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	
+	/* 1-14. jwt - impl */
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	
+	/* 1-15. jwt - jackson*/
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	
+	/* 1-16. 프로퍼티 값 설정 관련 */
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	
+	/* 1-17. mail */
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	
+	/* 1-18. 외부 WAS(Tomcat 등)에 WAR 형태로 배포하면 외부톰캣 쓰겠다는 말 */
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	
+	/* 1-19. Spring Test */
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	
+	/* 1-20. Spring Security Test(@WithMockUser, @WithUserDetails 등) */
+	testImplementation 'org.springframework.security:spring-security-test'
+	
+	/* 1-21. JUnit Platform(JUnit 5 테스트 실행용, 기본 생성됨) */
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
