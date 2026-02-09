@@ -88,6 +88,12 @@ dependencies {
 	
 	/* 1-21. JUnit Platform(JUnit 5 테스트 실행용, 기본 생성됨) */
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
+	/* 1-22. assertj-core */
+	testImplementation 'org.assertj:assertj-core:3.24.2'
+	
+	/* 1-23. thymeleaf */
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 tasks.named('test') {
