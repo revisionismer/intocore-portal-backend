@@ -41,8 +41,8 @@ dependencies {
 	/* 1-5. JDBC */
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	
-	/* 1-6. mariadb  */
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+	/* 1-6. mariadb -> 2026-02-14 : 하이버네이트 로그 때문에 버전 명시 */
+	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:3.5.7'
 	
 	/* 1-7. h2 database */
 	runtimeOnly 'com.h2database:h2'
@@ -94,6 +94,7 @@ dependencies {
 	
 	/* 1-23. thymeleaf */
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
 }
 
 tasks.named('test') {
