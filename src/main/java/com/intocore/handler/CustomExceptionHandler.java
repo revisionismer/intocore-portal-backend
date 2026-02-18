@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import com.intocore.common.dto.ResponseDto;
-import com.library.handler.exception.CustomApiException;
-import com.library.handler.exception.CustomValidationException;
+import com.intocore.handler.exception.CustomApiException;
+import com.intocore.handler.exception.CustomValidationException;
 
 @RestControllerAdvice // 1-1. @ControllerAdvice + @RestController : 모든 exception을 낚아챈다.
 public class CustomExceptionHandler {

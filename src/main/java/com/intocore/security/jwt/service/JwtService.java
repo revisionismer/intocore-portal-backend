@@ -13,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intocore.common.dto.ResponseDto;
+import com.intocore.handler.exception.CustomApiException;
 import com.intocore.security.jwt.JwtProperties;
 import com.intocore.user.domain.User;
 import com.intocore.user.domain.UserRepository;
-import com.library.handler.exception.CustomApiException;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

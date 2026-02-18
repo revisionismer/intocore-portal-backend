@@ -16,12 +16,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import com.intocore.handler.exception.CustomApiException;
 import com.intocore.security.auth.PrincipalDetails;
 import com.intocore.security.jwt.JwtProperties;
 import com.intocore.security.jwt.service.JwtService;
 import com.intocore.user.domain.User;
 import com.intocore.user.domain.UserRepository;
-import com.library.handler.exception.CustomApiException;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
