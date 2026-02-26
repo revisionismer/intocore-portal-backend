@@ -66,22 +66,29 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter { // 1-1. 
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		
+		// 2026-02-26 : Bearer + access_token 방식 -> HttpOnly 쿠키를 사용하여 클라이언트에서 토큰 접근을 차단하고 보안 강화하는 방식으로 변경
 		try {
+			// 1-4. access_token 변수 선언 (쿠키에서 추출 예정)
+			String access_token = null;
 			
-			// 1-4. jwt 헤더 스트링 값을 request에서 뽑아본다.
-			String jwtHeader = request.getHeader(JwtProperties.HEADER_STRING);
+			// 1-5. request 포함된 쿠키 목록 가져오기
+			Cookie[] cookies = request.getCookies();
 			
-			// 1-5. JWT 토큰을 검증해서 header 값이 있는지 확인하고 있다면 Bearer로 시작하는지까지 체킹한다.
-			if(jwtHeader == null || !jwtHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
-				// 1-6. 1-4이라면 필터를 계속 타게 한다.
+			// 1-6. 쿠키 중 access_token 이름을 가진 값 탐색
+			if(cookies != null) {
+				for(Cookie cookie : cookies) {
+					if("access_token".equals(cookie.getName())) {
+						access_token = cookie.getValue();
+						break;
+					}
+				}
+			}
+			
+			// 1-7. access_token 쿠키가 없으면 인증 처리 없이 다음 필터로 이동
+			if(access_token == null) {
 				chain.doFilter(request, response);
 				return;
 			}
-			
-			// 1-7. 1-6을 거쳐서 넘어왔으면 jwtHeader에 Bearer + accessToken 값이 넘어 올텐데 거기서 Bearer란 단어를 제외하고 문자를 가져온다.
-			String access_token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
-			
-			System.out.println("doFilter access_token : " + access_token);
 			
 			System.out.println("access_token : " + access_token);
 			
@@ -194,6 +201,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter { // 1-1. 
 						cookie.setPath("/");
 						cookie.setSecure(true);
 						
+						// 2026-02-26 : HttpOnly 설정으로 JS에서 쿠키 접근 차단 (XSS 토큰 탈취 방지)
+						cookie.setHttpOnly(true);
+						
 						System.out.println("cookie : " + cookie.getValue());
 						
 						// 1-33. 응답 객체에 새로 생성된 쿠키 장착.
@@ -225,3 +235,20 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter { // 1-1. 
         } 
 	}
 }
+
+/*
+ 			* Bearer + access_token을 헤더에 셋팅해서 인증하는 방식
+			// 1-4. jwt 헤더 스트링 값을 request에서 뽑아본다.
+//			String jwtHeader = request.getHeader(JwtProperties.HEADER_STRING);
+			
+			// 1-5. JWT 토큰을 검증해서 header 값이 있는지 확인하고 있다면 Bearer로 시작하는지까지 체킹한다.
+//			if(jwtHeader == null || !jwtHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
+				// 1-6. 1-4이라면 필터를 계속 타게 한다.
+//				chain.doFilter(request, response);
+//				return;
+//			}
+			
+			// 1-7. 1-6을 거쳐서 넘어왔으면 jwtHeader에 Bearer + accessToken 값이 넘어 올텐데 거기서 Bearer란 단어를 제외하고 문자를 가져온다.
+//			String access_token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
+					 
+ */
