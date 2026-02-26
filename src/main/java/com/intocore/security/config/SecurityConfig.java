@@ -96,7 +96,14 @@ public class SecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.addAllowedHeader("*");  // 2-2. 모든 header 응답 허용
 		configuration.addAllowedMethod("*");  // 2-3. GET, POST, PUT, DELETE 허용
-		configuration.addAllowedOriginPattern("*");  // 2-4. 모든 IP 주소 허용
+		
+		// 2026-02-26 : httpOnly 쿠키  방식에선 모든 IP주소 허용하지 말고 Origin을 지정해줘야한다.
+		configuration.addAllowedOriginPattern("http://127.0.0.1:3000");
+		configuration.addAllowedOriginPattern("http://localhost:3000");
+		configuration.addAllowedOriginPattern("https://127.0.0.1:3000");
+		configuration.addAllowedOriginPattern("https://localhost:3000");
+		
+	//	configuration.addAllowedOriginPattern("*");  // 2-4. 모든 IP 주소 허용(Bearer 방식에서만)
 		configuration.setAllowCredentials(true);  // 2-5. 클라이언트쪽에서 쿠키 요청하는걸 허용(사용자 자격 증명이 지원되는지 여부)
 		configuration.addExposedHeader("Authorization");  // 2-6. 브라우저 버전이 바뀌면 default가 아닐 수도 있기 때문에 넣어준다.(2023-07-29)
 		

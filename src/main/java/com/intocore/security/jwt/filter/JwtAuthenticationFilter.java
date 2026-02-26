@@ -155,7 +155,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		jwtService.setRefreshToken(principalDetails.getUser().getUsername(), refresh_token);		
 				
 		// 1-24. JWT 토큰 response header에 담음(주의 : Bearer 다음에 한칸 띄우고 저장해야함)
-		response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + access_token);
+		// 2026-02-26 : httpOnly 쿠키 방식으로 갈거라서 Header에 값박는거 주석
+//		response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + access_token);
 		
 		// 1-25. access_token 쿠키에 저장.
 		Cookie cookie = new Cookie("access_token", access_token);
@@ -163,6 +164,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		// 1-26. 쿠키는 항상 도메인 주소가 루트("/")로 설정되어 있어야 모든 요청에서 사용 가능.
 		cookie.setPath("/");
 		cookie.setSecure(true);
+		
+		// 2026-02-26 : 발급시 httpOnly 걸어주기
+		cookie.setHttpOnly(true);
+		
+		// 2026-02-26 : 요즘 브라우저는 SameSite 없으면 쿠키 전송 안되는 경우 많아 추가.
+		cookie.setAttribute("SameSite", "None");
 			
 		response.addCookie(cookie);
 		
@@ -176,6 +183,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		// 1-29. 응답 데이터 셋팅
 		responseData.put("code", 1);
 		responseData.put("message", "jwt 인증 성공");
+		
+		// 2026-02-26 : PK 값도 같이 들고가야해서 추가
+		responseData.put("userId", principalDetails.getUser().getId());
+		
 		responseData.put("username", principalDetails.getUser().getUsername());
 		responseData.put("role", principalDetails.getUser().getRole());
 		
