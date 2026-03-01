@@ -191,8 +191,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter { // 1-1. 
 							
 						System.out.println("access_token = " + access_token);
 							
-						// 1-30. header에 새로운 access_token 장착
-						response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + access_token);
+						// 1-30. header에 새로운 access_token 장착, 2026-02-28 : 헤더에 토큰 삽입하는 로직 제거
+//						response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + access_token);
 						
 						// 1-31. 1-29에서 만든 새로운 access_token으로 쿠키 생성 하고 편집 못하게 암호화.
 						Cookie cookie = new Cookie("access_token", access_token);
