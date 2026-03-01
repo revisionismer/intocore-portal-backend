@@ -17,6 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.intocore.common.constant.user.UserEnum;
+import com.intocore.handler.CustomLogoutHandler;
 import com.intocore.security.jwt.filter.JwtAuthenticationFilter;
 import com.intocore.security.jwt.filter.JwtAuthorizationFilter;
 import com.intocore.security.jwt.service.JwtService;
@@ -83,6 +84,13 @@ public class SecurityConfig {
 				   				  								 				 .anyRequest()  // 1-17. 1-15, 1-16가 아닌 요청은			
 				   				  								 				 .permitAll()  // 1-18. 모두 허용
 				   )
+				   .logout(   // 3-1. custom logout 
+							(logout) -> logout
+											  .logoutUrl("/logout")  // 3-2. /logout이라고 request가 들어올때 발동
+											  .addLogoutHandler(new CustomLogoutHandler(jwtService))  // 3-3. LogoutHandler를 재정의한 CustomLogoutHandler를 구현
+											  .logoutSuccessUrl("/") // 3-4. logout 성공시 / 으로 redirect
+							
+					)  
 				   // 1-19. 폼로그인을 사용하지 않기 때문에 UsernamePasswordAuthenticationFilter 재정의한 JwtAuthenticationFilter로 등록하여 대체해 인증처리를 진행한다.(addFilterAt(1, 2) -> 1을 2로 대체)
 				   .addFilterAt(new JwtAuthenticationFilter(authenticationManager(configuration), jwtService), UsernamePasswordAuthenticationFilter.class) 
 				   .addFilterBefore(new JwtAuthorizationFilter(authenticationManager(configuration), userRepository, jwtService), UsernamePasswordAuthenticationFilter.class)  // 4-2. 권한 관리 필터 등록. -> SecurityFilterChain 앞에 addFilterBefore로 필터를 등록.
@@ -105,7 +113,7 @@ public class SecurityConfig {
 		
 	//	configuration.addAllowedOriginPattern("*");  // 2-4. 모든 IP 주소 허용(Bearer 방식에서만)
 		configuration.setAllowCredentials(true);  // 2-5. 클라이언트쪽에서 쿠키 요청하는걸 허용(사용자 자격 증명이 지원되는지 여부)
-		configuration.addExposedHeader("Authorization");  // 2-6. 브라우저 버전이 바뀌면 default가 아닐 수도 있기 때문에 넣어준다.(2023-07-29)
+	//	configuration.addExposedHeader("Authorization");  // 2-6. 브라우저 버전이 바뀌면 default가 아닐 수도 있기 때문에 넣어준다.(2023-07-29)(Bearer 방식에서만)
 		
 		// 2-7. UrlBasedCorsConfigurationSource 객체 생성
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
