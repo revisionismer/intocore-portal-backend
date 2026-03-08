@@ -24,6 +24,19 @@ public class UserApiController {
 
 	private final UserService userService;
 	
+	@GetMapping("/auth/me")
+    public ResponseEntity<?> isCurrentUser(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+
+        if (principalDetails == null || principalDetails.getUser() == null) {
+            return new ResponseEntity<>(new ResponseDto<>(-1, "로그인 정보가 없습니다.", null), HttpStatus.UNAUTHORIZED);
+        }
+
+        User loginUser = principalDetails.getUser();
+        UserInfoRespDto userInfoRespDto = userService.userInfoByUserId(loginUser.getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, loginUser.getId() + "번 유저 정보 조회 성공", userInfoRespDto), HttpStatus.OK);
+    }
+	
 	@GetMapping("/s/info")
 	public ResponseEntity<?> userInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) {
 		
