@@ -1,6 +1,7 @@
 package com.intocore.security.jwt.filter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,9 +41,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter { // 1-1. BasicAuthenticationFilter 상속
 
-	private static String secretKey = JwtProperties.SECRET_KEY;
+	private final static String secretKey = JwtProperties.SECRET_KEY;
 	
-	byte[] secretKeyBytes = secretKey.getBytes();
+	private final static byte[] secretKeyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
 	
 	private UserRepository userRepository;
 	
@@ -152,7 +153,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter { // 1-1. 
 					}
 					
 					// 1-22. access_token이 만료되었거나 만료되기 1일전이라면 -> (거의 모든 요청마다 access_token은 재발급) 
-					if(jwtService.isNeedToUpdateAccessToken(access_token) || !jwtService.validationToken(access_token)) {
+					if(jwtService.isNeedToUpdateAccessToken(access_token)) {
 						log.info("엑세스 토큰 재발급하기");
 						// 1-24. access 토큰 재발급
 						System.out.println("엑세스 토큰 재발급 해야된다.");

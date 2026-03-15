@@ -1,6 +1,7 @@
 package com.intocore.security.jwt.service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,6 +19,7 @@ import com.intocore.security.jwt.JwtProperties;
 import com.intocore.user.domain.User;
 import com.intocore.user.domain.UserRepository;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -25,22 +27,20 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-@Data
 @Slf4j
 public class JwtService {
 
-	// 1-1 : JWT 서명용 HS256 키
-	private static String secretKey = JwtProperties.SECRET_KEY;
+	// 1-1 : JWT 서명용 HS256 키(2026-03-14 : final 붙임)
+	private static final String secretKey = JwtProperties.SECRET_KEY;
 
-	// 1-2 : HMAC-SHA256 알고리즘에 사용할 1-1번 키의 바이트 배열
-	byte[] secretKeyBytes = secretKey.getBytes();
+	// 1-2 : HMAC-SHA256 알고리즘에 사용할 1-1번 키의 바이트 배열(2026-03-14 : final 붙이고, StandardCharsets 명시)
+	private final static byte[] secretKeyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
 	
 	// 1-3 : User Repository
 	private final UserRepository userRepository;
@@ -108,21 +108,23 @@ public class JwtService {
 		response.getWriter().write(result);
 	}
 	
-	// 1-7. JWT 액세스 토큰이 곧 만료될 예정인지 판단하는 함수
+	// 1-7. JWT 액세스 토큰이 곧 만료될 예정인지 판단하는 함수 
+	// 2026-03-14 : 거의 모든 요청에서 access_token이 재발급되는 현상 해결하기 위해 코드 변경(만료 2시간전 -> 5분전)
 	public boolean isNeedToUpdateAccessToken(String access_token) {
 		try {
-			Date expiresAt = Jwts.parserBuilder().setSigningKey(secretKeyBytes).build().parseClaimsJws(access_token).getBody().getExpiration();
+			Date expiresAt = getClaims(access_token).getExpiration();
 			
 			Date current_date = new Date(System.currentTimeMillis());
 			
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(current_date);
-			calendar.add(Calendar.DATE, 2);
 			
-			Date after1dayFromToday = calendar.getTime();
+			calendar.add(Calendar.MINUTE, 5);
 			
-			if(expiresAt.before(after1dayFromToday)) {
-				log.info("access_token 만료 예정 일 : " + after1dayFromToday);
+			Date after5MinutesFromNow = calendar.getTime();
+			
+			if(expiresAt.before(after5MinutesFromNow)) {
+				log.info("access_token 만료 예정 시간 : " + expiresAt);
 				return true;
 			}
 		} catch (Exception e) {
@@ -141,15 +143,16 @@ public class JwtService {
 			// 2-3. 쿠키를 for문으로 하나하나 돌려서
 			for(Cookie cookie : cookies) {
 				// 2-4. access_token이라는 쿠키가 있다면
-				if(cookie.getName().equals("access_token")) {
-					// 2-5. 쿠키에서 access_token 값 String으로 가져온다.
-					String access_token = cookie.getValue().toString();
+				if("access_token".equals(cookie.getName())) {  // 2026-03-14 : if(cookie.getName().equals("access_token")) -> if("access_token".equals(cookie.getName())) 변경(NullPointerException 방지) 
+					// 2-5. 쿠키에서 access_token 값 String으로 가져온다.(2026-03-14 : toString 제거)
+					String access_token = cookie.getValue();
 					
 					log.info("토큰 값 : " + access_token);
 					
 					try {
 						// 2-6. access_token에 들어있는 username 값을 가져온다.
-						String username = (String) Jwts.parserBuilder().setSigningKey(secretKeyBytes).build().parseClaimsJws(access_token).getBody().get("username");
+//						String username = (String) Jwts.parserBuilder().setSigningKey(secretKeyBytes).build().parseClaimsJws(access_token).getBody().get("username");
+						String username = getClaims(access_token).get("username", String.class);
 						
 						// 2-7. 해당 username으로 DB에서 해당 user를 찾는다. 
 						Optional<User> userOp = userRepository.findByUsername(username);
@@ -209,5 +212,14 @@ public class JwtService {
 		} else {
 			throw new CustomApiException("Refresh Token update error");
 		}
+	}
+	
+	// 1-10. Claims 함수 밖으로 빼기
+	public Claims getClaims(String token) {
+	    return Jwts.parserBuilder()
+	            .setSigningKey(secretKeyBytes)
+	            .build()
+	            .parseClaimsJws(token)
+	            .getBody();
 	}
 }

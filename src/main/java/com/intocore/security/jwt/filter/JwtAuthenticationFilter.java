@@ -1,6 +1,7 @@
 package com.intocore.security.jwt.filter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,9 +40,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {  // Tip : UsernamePasswordAuthenticationFilter -> POST /login 요청이 들어오면 실행되는 스프링 시큐리티의 기본 로그인 인증 필터
 
-	private static String secretKey = JwtProperties.SECRET_KEY;
+	private final static String secretKey = JwtProperties.SECRET_KEY;
 	
-	byte[] secretKeyBytes = secretKey.getBytes();	
+	private final static byte[] secretKeyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
 	
 	private AuthenticationManager authenticationManager;
 	
@@ -137,9 +138,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		
 		System.out.println("access_token = " + access_token);	
 		
-		// 1-22. JWT 토큰 Builder : refresh token -> expiredTime을 24시간보다 약간 크게 설정함.
+		// 1-22. JWT 토큰 Builder : refresh token -> expiredTime을 24시간 59분 59초.
 		expiredTime *= 23;
-		expiredTime += 100000;
+		expiredTime += 3599000;
 		date.setTime(System.currentTimeMillis() + expiredTime);
 		
 		String refresh_token = Jwts.builder()
@@ -164,6 +165,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		// 1-26. 쿠키는 항상 도메인 주소가 루트("/")로 설정되어 있어야 모든 요청에서 사용 가능.
 		cookie.setPath("/");
 		cookie.setSecure(true);
+		
+		// 2026-03-14 : 엑세스토큰 만료시간이 1시간이브로 3600초로 쿠키도 설정
+		cookie.setMaxAge(60 * 60);
 		
 		// 2026-02-26 : 발급시 httpOnly 걸어주기
 		cookie.setHttpOnly(true);
