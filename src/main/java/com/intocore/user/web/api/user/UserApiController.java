@@ -5,14 +5,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.intocore.common.dto.ResponseDto;
 import com.intocore.security.auth.PrincipalDetails;
 import com.intocore.user.domain.User;
 import com.intocore.user.service.user.UserService;
 import com.intocore.user.web.dto.user.UserInfoRespDto;
+import com.intocore.user.web.dto.user.UserProfileRespDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,5 +49,15 @@ public class UserApiController {
 		UserInfoRespDto userInfoRespDto = userService.userInfoByUserId(loginUser.getId());
 		
 		return new ResponseEntity<>(new ResponseDto<>(1, loginUser.getId() + "번 유저 정보 조회 성공", userInfoRespDto), HttpStatus.OK);
+	}
+	
+	@PutMapping("/s/update/profileImage")
+	public ResponseEntity<?> profileImageUpdate(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam("profileImageFile") MultipartFile profileImageFile) { // 1-1. html input file의 name 값과 매핑해줘야 한다.(중요)
+		
+		User loginUser = principalDetails.getUser();
+		
+		UserProfileRespDto userProfileRespDto = userService.userProfilePictureUpdate(loginUser.getId(), profileImageFile);
+		
+		return new ResponseEntity<>(new ResponseDto<>(1, "프로필 사진 변경 성공", userProfileRespDto), HttpStatus.OK);
 	}
 }
