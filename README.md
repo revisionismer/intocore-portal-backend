@@ -9,4 +9,5 @@
 7. JWT 인증/인가 Bearer + access\_token을 헤더에 넣는 방식에서 HttpOnly 쿠키 인증 방식으로 변경
 8. JWT 인증/인가 HttpOnly 쿠키 인증 방식 버전 커스텀 로그아웃 로직 구현
 9. JWT 인증/인가 로직 예외 처리 보완
+10. &#x20;WebMvcConfig 만들기 및 프로필 이미지 업로드 서비스 구현
 
