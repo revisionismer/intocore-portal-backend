@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -17,6 +18,8 @@ import com.intocore.user.domain.User;
 import com.intocore.user.domain.UserRepository;
 import com.intocore.user.web.dto.user.UserInfoRespDto;
 import com.intocore.user.web.dto.user.UserProfileRespDto;
+import com.intocore.user.web.dto.user.UserUpdateInfoReqDto;
+import com.intocore.user.web.dto.user.UserUpdateInfoRespDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 	
 	private final UserRepository userRepository;
+	
+	private final PasswordEncoder passwordEncoder;
 	
 	@Value("${thumnail.path}")
 	private String thumnailFolder;
@@ -81,5 +86,24 @@ public class UserService {
 		
 		return new UserProfileRespDto(userEntity);
 				
+	}
+	
+	public UserUpdateInfoRespDto userProfileInfoUpdate(Long principalId, UserUpdateInfoReqDto userUpdateInfoReqDto) {
+		
+		// 4-1. 전달받은 principalId로 userEntity를 가져온다.
+		User userEntity = userRepository.findById(principalId).orElseThrow(() -> {
+			throw new CustomApiException("해당 유저를 찾을 수 없습니다.");
+		});
+		
+		// 4-2. 전달 받은 userUpdateInfoReq에 들어있는 비밀번호가 DB에 저장된 비밀번호와 같은지 검증.
+		if(!passwordEncoder.matches(userUpdateInfoReqDto.getPassword(), userEntity.getPassword())) {
+			throw new CustomApiException("비밀번호가 다릅니다.");
+		}
+		
+		// 4-3. 비밀번호가 동일 하다면 전달받은 데이터로 엔티티 업데이트(변경 감지)
+		userEntity.update(userUpdateInfoReqDto);
+		
+		// 4-4. 업데이트된 엔티티 정보를 UserUpdateInfoRespDto로 변환 후 반환
+		return new UserUpdateInfoRespDto(userEntity);
 	}
 }

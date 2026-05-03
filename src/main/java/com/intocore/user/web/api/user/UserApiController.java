@@ -5,7 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +19,8 @@ import com.intocore.user.domain.User;
 import com.intocore.user.service.user.UserService;
 import com.intocore.user.web.dto.user.UserInfoRespDto;
 import com.intocore.user.web.dto.user.UserProfileRespDto;
+import com.intocore.user.web.dto.user.UserUpdateInfoReqDto;
+import com.intocore.user.web.dto.user.UserUpdateInfoRespDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -60,4 +64,15 @@ public class UserApiController {
 		
 		return new ResponseEntity<>(new ResponseDto<>(1, "프로필 사진 변경 성공", userProfileRespDto), HttpStatus.OK);
 	}
+	
+	@PutMapping("/s/{id}/update")
+	public ResponseEntity<?> updateUserInfo(@PathVariable("id") Long id, @RequestBody UserUpdateInfoReqDto userUpdateInfoReqDto, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+		
+		User loginUser = principalDetails.getUser();
+		
+		UserUpdateInfoRespDto userUpdateInfoReqpDto = userService.userProfileInfoUpdate(id, userUpdateInfoReqDto);
+		
+		return new ResponseEntity<>(new ResponseDto<>(1, loginUser.getId() + "번 유저 정보 업데이트 성공", userUpdateInfoReqpDto), HttpStatus.OK);
+	}
+	
 }

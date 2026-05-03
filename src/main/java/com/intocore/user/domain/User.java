@@ -4,12 +4,15 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.intocore.common.constant.user.UserEnum;
+import com.intocore.user.web.dto.user.UserUpdateInfoReqDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -26,6 +29,7 @@ import lombok.Setter;
 @Getter @Setter
 @Table(name = "user_tb")
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 	
 	@Id
@@ -77,7 +81,12 @@ public class User {
 		this.name = name;
 		this.phone = phone;
 		this.role = role;
-		this.createdDate = createdDate;
-		this.updatedDate = updatedDate;
 	}
+ 	
+ 	public void update(UserUpdateInfoReqDto userUpdateInfoReqDto) {
+ 		if (userUpdateInfoReqDto.getName() != null) this.name = userUpdateInfoReqDto.getName();
+ 		if (userUpdateInfoReqDto.getGender() != null) this.gender = userUpdateInfoReqDto.getGender();
+ 		if (userUpdateInfoReqDto.getPhone() != null) this.phone = userUpdateInfoReqDto.getPhone();
+ 		if (userUpdateInfoReqDto.getWebsite() != null) this.website = userUpdateInfoReqDto.getWebsite();
+ 	}
 }
