@@ -1,11 +1,15 @@
 package com.intocore.handler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -46,4 +50,17 @@ public class CustomExceptionHandler {
 		return new ResponseEntity<>(new ResponseDto<>(-1, maxFileSize + "크기를 초과한 파일입니다.", null), HttpStatus.BAD_REQUEST);
 	}
 	
+	// 2026-05-10 : REST API 용 ExceptionHandler 추가
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<?> validationApiException(MethodArgumentNotValidException e) {
+		log.error(e.getMessage());
+		
+		Map<String, String> errorMap = new HashMap<>();
+
+	    e.getBindingResult().getFieldErrors().forEach(error ->
+	        errorMap.put(error.getField(), error.getDefaultMessage())
+	    );
+		
+		return new ResponseEntity<>(new ResponseDto<>(-1, "유효성 검사 실패", errorMap), HttpStatus.BAD_REQUEST);
+	}
 }
