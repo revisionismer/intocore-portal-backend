@@ -166,7 +166,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		cookie.setPath("/");
 		cookie.setSecure(true);
 		
-		// 2026-03-14 : 엑세스토큰 만료시간이 1시간이브로 3600초로 쿠키도 설정
+		// 2026-03-14 : 엑세스토큰 만료시간이 1시간이므로 3600초로 쿠키도 설정
 		cookie.setMaxAge(60 * 60);
 		
 		// 2026-02-26 : 발급시 httpOnly 걸어주기

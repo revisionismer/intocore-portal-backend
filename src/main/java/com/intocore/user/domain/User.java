@@ -19,7 +19,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,7 +36,6 @@ public class User {
 	private Long id;  // 1-1. PK
 	
 	@Column(length = 100, unique = true, nullable = false)  // 1-16. OAuth2 로그인을 위해 20 -> 100자로 늘린다.
-	@Email(message = "이메일 형식이어야 합니다.")
 	private String username;  // 1-2. 계정 명
 	
 	@Column(nullable = false)
@@ -89,4 +87,5 @@ public class User {
  		if (userUpdateInfoReqDto.getPhone() != null) this.phone = userUpdateInfoReqDto.getPhone();
  		if (userUpdateInfoReqDto.getWebsite() != null) this.website = userUpdateInfoReqDto.getWebsite();
  	}
+ 	
 }
