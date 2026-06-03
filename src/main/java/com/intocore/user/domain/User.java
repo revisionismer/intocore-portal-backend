@@ -88,4 +88,8 @@ public class User {
  		if (userUpdateInfoReqDto.getWebsite() != null) this.website = userUpdateInfoReqDto.getWebsite();
  	}
  	
+ 	public void updatePassword(String newPassword) {
+ 		if(newPassword != null) this.password = newPassword; 	
+ 	}
+ 	
 }
