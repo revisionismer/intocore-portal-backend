@@ -12,3 +12,5 @@
 10. WebMvcConfig 만들기 및 프로필 이미지 업로드 서비스 구현
 11. JPA Auditing 적용하여 JPA 변경 감지로 User 정보 업데이트 서비스 구현
 12. 회원 가입 API 생성 및 Validation 적용
+13. CustomExceptionHandler에 MethodArgumentNotValidException 추가 User 정보 업데이트, 비밀번호 업데이트 로직 추가
+

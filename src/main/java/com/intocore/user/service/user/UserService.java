@@ -17,6 +17,7 @@ import com.intocore.handler.exception.CustomApiException;
 import com.intocore.user.domain.User;
 import com.intocore.user.domain.UserRepository;
 import com.intocore.user.web.dto.user.UserInfoRespDto;
+import com.intocore.user.web.dto.user.UserPasswordReqDto;
 import com.intocore.user.web.dto.user.UserProfileRespDto;
 import com.intocore.user.web.dto.user.UserUpdateInfoReqDto;
 import com.intocore.user.web.dto.user.UserUpdateInfoRespDto;
@@ -35,6 +36,7 @@ public class UserService {
 	@Value("${thumnail.path}")
 	private String thumnailFolder;
 	
+	@Transactional(readOnly = true)
 	public UserInfoRespDto userInfoByUserId(Long userId) {
 		
 		Optional<User> userOp = userRepository.findById(userId);
@@ -88,12 +90,17 @@ public class UserService {
 				
 	}
 	
-	public UserUpdateInfoRespDto userProfileInfoUpdate(Long principalId, UserUpdateInfoReqDto userUpdateInfoReqDto) {
+	public UserUpdateInfoRespDto userProfileInfoUpdate(Long principalId, User loginUser, UserUpdateInfoReqDto userUpdateInfoReqDto) {
 		
 		// 4-1. 전달받은 principalId로 userEntity를 가져온다.
 		User userEntity = userRepository.findById(principalId).orElseThrow(() -> {
 			throw new CustomApiException("해당 유저를 찾을 수 없습니다.");
 		});
+		
+		// 2026-05-14 : 실제 로그인 유저인지 백엔드 단에서 한번 체크하는 로직 추가
+		if(!principalId.equals(loginUser.getId())) {
+		    throw new CustomApiException("권한이 없습니다.");
+		}
 		
 		// 4-2. 전달 받은 userUpdateInfoReq에 들어있는 비밀번호가 DB에 저장된 비밀번호와 같은지 검증.
 		if(!passwordEncoder.matches(userUpdateInfoReqDto.getPassword(), userEntity.getPassword())) {
@@ -105,5 +112,46 @@ public class UserService {
 		
 		// 4-4. 업데이트된 엔티티 정보를 UserUpdateInfoRespDto로 변환 후 반환
 		return new UserUpdateInfoRespDto(userEntity);
+	}
+	
+	public void userPasswordUpdate(Long principalId, User loginUser, UserPasswordReqDto userPasswordReqDto) {
+		
+		// 5-1. 전달 받은 id로 유저 엔티티 조회
+		User userEntity = userRepository.findById(principalId).orElseThrow(() -> {
+			throw new CustomApiException("해당 유저를 찾을 수 없습니다.");
+		});
+		
+		// 5-2.
+		if(!principalId.equals(loginUser.getId())) {
+			throw new CustomApiException("로그인한 유저가 아닙니다.");
+		}
+	
+		// 5-3.
+		if(userPasswordReqDto.getCurPassword() == null || userPasswordReqDto.getCurPassword().trim().isEmpty()) {
+		    throw new CustomApiException("현재 비밀번호를 입력해주세요.");
+		}
+		
+		// 5-4.
+		if(userPasswordReqDto.getNewPassword() == null || userPasswordReqDto.getNewPassword().trim().isEmpty()) {
+		    throw new CustomApiException("새 비밀번호를 입력해주세요.");
+		}
+
+		// 5-5.
+		if(userPasswordReqDto.getNewPasswordChk() == null || userPasswordReqDto.getNewPasswordChk().trim().isEmpty()) {
+		    throw new CustomApiException("새 비밀번호 확인을 입력해주세요.");
+		}
+		
+		// 5-6. 새 비밀번호 검증(백엔드에서 한번더)
+		if(!userPasswordReqDto.getNewPassword().equals(userPasswordReqDto.getNewPasswordChk())) {
+		    throw new CustomApiException("새 비밀번호가 일치하지 않습니다.");
+		}
+		
+		// 5-7. 전달된 현재 비밀번호가 DB에 저장된 현재 비밀번호와 맞지 않을때 예외 처리
+		if(!passwordEncoder.matches(userPasswordReqDto.getCurPassword(), userEntity.getPassword())) {
+			throw new CustomApiException("현재 비밀번호가 맞지 않습니다.");
+		}
+		
+		// 5-8.
+		userEntity.updatePassword(passwordEncoder.encode(userPasswordReqDto.getNewPassword()));
 	}
 }
