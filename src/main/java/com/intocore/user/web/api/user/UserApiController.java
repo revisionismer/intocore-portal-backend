@@ -18,6 +18,7 @@ import com.intocore.security.auth.PrincipalDetails;
 import com.intocore.user.domain.User;
 import com.intocore.user.service.user.UserService;
 import com.intocore.user.web.dto.user.UserInfoRespDto;
+import com.intocore.user.web.dto.user.UserPasswordReqDto;
 import com.intocore.user.web.dto.user.UserProfileRespDto;
 import com.intocore.user.web.dto.user.UserUpdateInfoReqDto;
 import com.intocore.user.web.dto.user.UserUpdateInfoRespDto;
@@ -70,9 +71,19 @@ public class UserApiController {
 		
 		User loginUser = principalDetails.getUser();
 		
-		UserUpdateInfoRespDto userUpdateInfoReqpDto = userService.userProfileInfoUpdate(id, userUpdateInfoReqDto);
+		UserUpdateInfoRespDto userUpdateInfoReqpDto = userService.userProfileInfoUpdate(id, loginUser, userUpdateInfoReqDto);
 		
 		return new ResponseEntity<>(new ResponseDto<>(1, loginUser.getId() + "번 유저 정보 업데이트 성공", userUpdateInfoReqpDto), HttpStatus.OK);
+	}
+	
+	@PutMapping("/s/{id}/password")
+	public ResponseEntity<?> updateUserPassword(@PathVariable("id") Long id, @RequestBody UserPasswordReqDto userPasswordReqDto, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+		
+		User loginUser = principalDetails.getUser();
+		
+		userService.userPasswordUpdate(id, loginUser, userPasswordReqDto);
+		
+		return new ResponseEntity<>(new ResponseDto<>(1, loginUser.getId() + "번 유저 비밀번호 업데이트 성공", null), HttpStatus.OK);
 	}
 	
 }

@@ -50,7 +50,7 @@ public class CustomExceptionHandler {
 		return new ResponseEntity<>(new ResponseDto<>(-1, maxFileSize + "크기를 초과한 파일입니다.", null), HttpStatus.BAD_REQUEST);
 	}
 	
-	// 2026-05-10 : REST API 용 ExceptionHandler 추가
+	// 2026-05-14 : MethodArgumentNotValidException : @Valid @Validated 어노테이션으로 검증이 실패시 터지는 예외.(ex. @NotNull, @Size 같은 어노테이션이 DTO에 붙어있을때 검증이 실패하면 해당 예외가 터짐)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<?> validationApiException(MethodArgumentNotValidException e) {
 		log.error(e.getMessage());
