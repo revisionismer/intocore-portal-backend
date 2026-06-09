@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.intocore.common.constant.user.UserEnum;
 import com.intocore.user.web.dto.user.UserUpdateInfoReqDto;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -18,6 +19,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
@@ -70,6 +72,9 @@ public class User {
  	private LocalDateTime updatedDate;  // 1-12. 수정일
  	
  	private String refreshToken;
+ 	
+ 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+ 	private UserNotification userNotification;
  	
  	@Builder
 	public User(Long id, String username, String password, String name, String phone, UserEnum role, LocalDateTime createdDate, LocalDateTime updatedDate) {
