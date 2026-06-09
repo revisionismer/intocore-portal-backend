@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.intocore.common.constant.user.UserEnum;
 import com.intocore.user.domain.User;
+import com.intocore.user.domain.UserNotification;
+import com.intocore.user.domain.UserNotificationRepository;
 import com.intocore.user.domain.UserRepository;
 import com.intocore.user.web.dto.auth.SignUpReqDto;
 import com.intocore.user.web.dto.auth.SignUpRespDto;
@@ -18,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 
 	private final UserRepository userRepository;
+	private final UserNotificationRepository userNotificationRepository;
+	
 	private final PasswordEncoder passwordEncoder;
 	
 	public SignUpRespDto signUp(SignUpReqDto signUpReqDto) {
@@ -37,6 +41,11 @@ public class AuthService {
 		newUser.setRole(UserEnum.USER);
 		
 		User userEntity = userRepository.save(newUser);
+		
+		UserNotification userNotification = new UserNotification();
+		userNotification.setUser(userEntity);
+		
+		userNotificationRepository.save(userNotification);
 		
 		return new SignUpRespDto(
 					userEntity.getId(),
