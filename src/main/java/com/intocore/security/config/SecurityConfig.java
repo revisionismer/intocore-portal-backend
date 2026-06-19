@@ -22,6 +22,7 @@ import com.intocore.security.jwt.filter.JwtAuthenticationFilter;
 import com.intocore.security.jwt.filter.JwtAuthorizationFilter;
 import com.intocore.security.jwt.service.JwtService;
 import com.intocore.user.domain.UserRepository;
+import com.intocore.user.service.user.UserLogService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,6 +42,9 @@ public class SecurityConfig {
 	
 	// 4-1. 
 	private final UserRepository userRepository;
+	
+	// 5-1. 로그 정보 서비스 
+	private final UserLogService userLogService;
 	
 	// 3-2. WebSecurityConfigurerAdapter를 상속해서 AuthenticationManager를 bean으로 등록했던걸 직접 등록. -> 이걸 등록해주면 콘솔에 비밀번호 뜨는게 안뜬다.
 	@Bean
@@ -92,7 +96,7 @@ public class SecurityConfig {
 							
 					)  
 				   // 1-19. 폼로그인을 사용하지 않기 때문에 UsernamePasswordAuthenticationFilter 재정의한 JwtAuthenticationFilter로 등록하여 대체해 인증처리를 진행한다.(addFilterAt(1, 2) -> 1을 2로 대체)
-				   .addFilterAt(new JwtAuthenticationFilter(authenticationManager(configuration), jwtService), UsernamePasswordAuthenticationFilter.class) 
+				   .addFilterAt(new JwtAuthenticationFilter(authenticationManager(configuration), jwtService, userLogService), UsernamePasswordAuthenticationFilter.class) 
 				   .addFilterBefore(new JwtAuthorizationFilter(authenticationManager(configuration), userRepository, jwtService), UsernamePasswordAuthenticationFilter.class)  // 4-2. 권한 관리 필터 등록. -> SecurityFilterChain 앞에 addFilterBefore로 필터를 등록.
 				   .build();
 	}

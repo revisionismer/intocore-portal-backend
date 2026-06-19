@@ -20,6 +20,7 @@ import com.intocore.security.auth.PrincipalDetails;
 import com.intocore.security.jwt.JwtProperties;
 import com.intocore.security.jwt.dto.SignInDto;
 import com.intocore.security.jwt.service.JwtService;
+import com.intocore.user.service.user.UserLogService;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -36,7 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 //      추후 attemptAuthentication, successfulAuthentication 등을 구현할 예정
 
 //  TIP : Controller 이전은 Filter 세계, Controller 이후는 Spring 세계 : Security Filter는 DispatcherServlet 전에 동작하는 서블릿 필터 그래서 Autowired나 @Component를 사용하면 안되고 생성자 주입으로 객체를 받아야한다.
-
 @Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {  // Tip : UsernamePasswordAuthenticationFilter -> POST /login 요청이 들어오면 실행되는 스프링 시큐리티의 기본 로그인 인증 필터
 
@@ -48,10 +48,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	
 	private JwtService jwtService;
 	
+	private UserLogService userLogService;
+	
 	// 1-2. SecurityConfig에서 AuthenticationManager와 JwtService를 주입받아 JWT 로그인 인증 처리에 사용
-	public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService) {
+	public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, UserLogService userLogService) {
 		this.authenticationManager = authenticationManager;
 		this.jwtService = jwtService;
+		this.userLogService = userLogService;
 	}
 	
 	// 1-3. attemptAuthentication : 로그인 요청이 들어왔을 때 실제 인증을 시도하는 메서드
@@ -104,6 +107,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		// 1-16. 방금 인증이 완료된 Authentication형 authResult에서 PrincipalDetails 객체를 가져온다.
 		PrincipalDetails principalDetails = (PrincipalDetails)authResult.getPrincipal();
 
+		// 3-1. 접속 로그 저장 서비스
+		try {
+			userLogService.insertAccessLog(principalDetails.getUser(), request);
+		} catch (Exception e) {
+			log.error("접속 로그 저장 실패: {}", e.getMessage());
+		}
+			
 		// 1-17. JWT 토큰 만들기 1 : Header값 생성
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("typ", "JWT");
