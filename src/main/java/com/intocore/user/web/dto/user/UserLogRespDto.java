@@ -14,6 +14,7 @@ import lombok.ToString;
 public class UserLogRespDto {
 
 	private Long id;
+	private String username;
     private String ip;
     private String device;
     private String country;
@@ -21,8 +22,9 @@ public class UserLogRespDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdDate;
     
-    public UserLogRespDto(UserLog userLog) {
+    public UserLogRespDto(UserLog userLog, String username) {
         this.id = userLog.getId();
+        this.username = username;
         this.ip = userLog.getIp();
         this.device = userLog.getDevice();
         this.country = userLog.getCountry();

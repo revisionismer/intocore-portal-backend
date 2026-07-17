@@ -70,7 +70,7 @@ public class UserLogService {
 		List<UserLog> logs = userLogRepository.findAllByUserId(user.getId());
 		
 		return logs.stream()
-				   .map( log -> new UserLogRespDto(log) )
+				   .map( log -> new UserLogRespDto(log, user.getUsername()) )
 				   .collect(Collectors.toList());
 	}
 	
