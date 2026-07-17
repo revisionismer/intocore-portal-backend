@@ -15,3 +15,5 @@
 13. CustomExceptionHandler에 MethodArgumentNotValidException 추가 User 정보 업데이트, 비밀번호 업데이트 로직 추가
 14. 결재 완료 알림, 공지 사항 알림 수신 조회, 수정 API 로직 구현
 15. 사용자 접속 로그 생성, 조회 API 로직 구현 및 jwt 필터에 장착
+16. 사용자 접속 로그 DTO에 username 추가
+
