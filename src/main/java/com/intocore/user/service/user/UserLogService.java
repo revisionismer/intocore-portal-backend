@@ -67,10 +67,11 @@ public class UserLogService {
 	@Transactional(readOnly = true)
 	public List<UserLogRespDto> getUserLogs(User user) {
 		
-		List<UserLog> logs = userLogRepository.findAllByUserId(user.getId());
+		// 2026-07-17 : 현재 로그인한 사람의 계정정보만 가져와서 수정
+		List<UserLog> logs = userLogRepository.findAll();
 		
 		return logs.stream()
-				   .map( log -> new UserLogRespDto(log, user.getUsername()) )
+				   .map( log -> new UserLogRespDto(log, log.getUser().getUsername()) )
 				   .collect(Collectors.toList());
 	}
 	
