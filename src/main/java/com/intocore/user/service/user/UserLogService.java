@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.intocore.common.constant.user.UserEnum;
+import com.intocore.handler.exception.CustomApiException;
 import com.intocore.user.domain.User;
 import com.intocore.user.domain.UserLog;
 import com.intocore.user.domain.UserLogRepository;
@@ -66,13 +68,20 @@ public class UserLogService {
 	// 2-1. 유저 접속 로그 리스트 조회
 	@Transactional(readOnly = true)
 	public List<UserLogRespDto> getUserLogs(User user) {
-		
-		// 2026-07-17 : 현재 로그인한 사람의 계정정보만 가져와서 수정
-		List<UserLog> logs = userLogRepository.findAll();
-		
-		return logs.stream()
-				   .map( log -> new UserLogRespDto(log, log.getUser().getUsername()) )
-				   .collect(Collectors.toList());
+		// 2026-07-18 : 관리자 권한일땐 전체 계정 로그리스트를, 관리자가 아닐땐 본인 계정 접속 로그 리스트를 반환 하도록 변경
+		List<UserLog> logs;
+
+	    if (UserEnum.ADMIN.equals(user.getRole())) {
+	        logs = userLogRepository.findAll();
+	    } else if (UserEnum.USER.equals(user.getRole())) {
+	        logs = userLogRepository.findAllByUserId(user.getId());
+	    } else {
+	        throw new CustomApiException("잘못된 접근 입니다.");
+	    }
+
+	    return logs.stream()
+	               .map(log -> new UserLogRespDto(log, log.getUser().getUsername()))
+	               .collect(Collectors.toList());
 	}
 	
 	// 1-1. user IP 정보 뽑아내는 메소드.
