@@ -17,7 +17,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-import com.intocore.handler.exception.CustomApiException;
 import com.intocore.security.auth.PrincipalDetails;
 import com.intocore.security.jwt.JwtProperties;
 import com.intocore.security.jwt.service.JwtService;
@@ -149,7 +148,16 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter { // 1-1. 
 					
 					// 1-21. 리프레시 토큰이 유효한 토큰인지 검증하는 로직
 					if(!jwtService.validationToken(db_refresh_token)) {
-						throw new CustomApiException("로그인을 다시해주세요.");
+						/* 2026-09-19 : 이 필터에서 던진 예외는 @RestControllerAdvice가 못 잡는다
+						  - JWT 인증/인가 필터는 DispatcherServlet 앞단에서 실행된다. 
+						    @RestControllerAdvice는 DispatcherServlet 안쪽(컨트롤러, 서비스)에서 발생한 예외만 처리하므로, 
+						    필터에서 CustomApiException을 던지면 핸들러가 처리하지 못하고 500 에러가 된다(실제로 DB의 refresh 토큰이 만료되었거나 null일 때 이 문제가 발생했다.) 
+						    그래서 필터에서는 예외를 던지지 않고 sendErrorResponse로 401 응답을 직접 작성한 뒤 return한다.
+						  - 필터에서는 예외를 던지지 말고 응답을 직접 쓴 뒤 return한다. 예외 던지기는 컨트롤러, 서비스에서 한다.
+						*/
+						jwtService.sendErrorResponse(response, "로그인을 다시해주세요.");
+						// 2026-09-19 : 밑에 코드로 진행 막고 return
+						return;
 					}
 					
 					// 1-22. access_token이 만료되었거나 만료되기 1일전이라면 -> (거의 모든 요청마다 access_token은 재발급) 
